@@ -6,11 +6,8 @@ const bodyParser = require('body-parser');
 
 dotenv.config();
 
-// kanishkatharuka500
-// 123456
-
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 const MONGODB_URL = process.env.MONGODB_URI;
 
 app.use(cors());
@@ -35,7 +32,7 @@ mongoose.connect(MONGODB_URL, {
 const connect = mongoose.connection;
 connect.once("open", () => {
     console.log("MongoDB database connection established successfully");
-})
+});
 
 app.listen(PORT, () =>{
     console.log(`Server is running on port ${PORT}`);

@@ -8,34 +8,29 @@ services:
   
   server:
     build: ./server
-    container_name: server_container
+    container_name: inventory-server_container
     ports:
-      - "3000:3000"
+      - "5000:5000"
     depends_on:
       - mongodb
-    volumes:
-      - ./server:/app
-      - /app/node_modules
     environment:
-      - MONGODB_URI=mongodb+srv://kanishkatharuka500:dTPVwACdN8lBoNVV@cluster0.7sbiyqh.mongodb.net/inventorydb?retryWrites=true&w=majority&appName=Cluster0
+      - MONGODB_URI=mongodb+srv://kanishkatharuka500:dTPVwACdN8lBoNVV@cluster0.7sbiyqh.mongodb.net/inventorydb
       - JWT_SECRET=supersecuretoken
     command: npm run dev
 
   client:
     build: ./client
-    container_name: client_container
+    container_name: inventory-client_container
     ports:
-      - "3001:3000"
+      - "3000:3000"
     depends_on:
       - server
     stdin_open: true
     tty: true
-    volumes:
-      - ./client:/app
-      - /app/node_modules
     environment:
-      - REACT_APP_API_URL=http://server:3000
-    command: npm run start
+      - REACT_APP_API_URL=http://server:5000
+      - CHOKIDAR_USEPOLLING=true
+    command: npm start
 
 volumes:
   mongodb_data:
