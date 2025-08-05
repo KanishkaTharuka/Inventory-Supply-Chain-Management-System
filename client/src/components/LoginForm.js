@@ -20,7 +20,7 @@ export default function LoginForm() {
 
   return (
     <div className="max-w-sm mx-auto mt-10 bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
+      <h2 className="text-xl font-bold mb-4 text-center">Login user</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input name="email" type="text" placeholder="Email" value={form.email}
           onChange={handleChange} className="w-full border p-2 rounded" required />
