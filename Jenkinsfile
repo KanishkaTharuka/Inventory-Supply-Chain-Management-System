@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_USER = 'kanishkatharuka'
-        FRONTEND_IMAGE = "${DOCKER_USER}/inventory-supply-chain-frontend:latest"
-        BACKEND_IMAGE = "${DOCKER_USER}/inventory-supply-chain-backend:latest"
+        USERNAME = 'kanishkatharuka'
+        FRONTEND_IMAGE = "${USERNAME}/inventory-supply-chain-frontend:latest"
+        BACKEND_IMAGE = "${USERNAME}/inventory-supply-chain-backend:latest"
     }
 
     stages {
@@ -22,7 +22,6 @@ pipeline {
                 echo 'Installing and building frontend...'
                 dir('client') {
                     bat 'npm install'
-                    bat 'npm start'
                 }
             }
         }
@@ -51,6 +50,7 @@ pipeline {
             steps {
                 echo 'Building and pushing backend Docker image...'
                 withCredentials([string(credentialsId: 'dockerhubpassword', variable: 'dockerpass')]) {
+                    bat "docker login -u %USERNAME% -p %dockerpass%"
                     bat "docker build -t %BACKEND_IMAGE% server"
                     bat "docker push %BACKEND_IMAGE%"
                 }
