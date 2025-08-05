@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('SCM Checkout') {
+            steps {
+                retry(3){
+                    git branch: 'main', url: 'https://github.com/KanishkaTharuka/Inventory-Supply-Chain-Management-System.git'
+                }
+            }
+        }
+        stage('Build Docker Images') {
+            steps {
+                bat 'docker build -t kanishkatharuka/inventory-supply-chain-frontend:%BUILD_NUMBER% ./client'
+                bat 'docker build -t kanishkatharuka/inventory-supply-chain-backend:%BUILD_NUMBER% ./server'
+            }
+        }
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'dockerhubpassword', variable: 'dockerpass')]) {
+                    bat 'docker login -u kanishkatharuka -p %dockerpass%'
+                }
+            }
+        }
+        stage('Push Docker Image'){
+            steps{
+                bat 'docker push kanishkatharuka/inventory-supply-chain-frontend:%BUILD_NUMBER%'
+                bat 'docker push kanishkatharuka/inventory-supply-chain-backend:%BUILD_NUMBER%'
+            }
+        }
+    }
+
+    post {
+        always {
+            bat 'docker logout'
+        }
+    }
+}

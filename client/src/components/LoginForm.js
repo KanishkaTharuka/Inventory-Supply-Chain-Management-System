@@ -3,7 +3,6 @@ import axios from 'axios';
 
 export default function LoginForm() {
   const [form, setForm] = useState({ username: '', password: '' });
-  const [token, setToken] = useState('');
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -11,7 +10,9 @@ export default function LoginForm() {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', form);
-      setToken(res.data.token);
+      localStorage.setItem('token', res.data.token);
+      // Redirect to dashboard or home page after successful login
+      window.location.href = '/';
     } catch (err) {
       alert('Login failed');
     }

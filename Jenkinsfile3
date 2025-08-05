@@ -1,0 +1,64 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE_SERVER = "kanishkatharuka/inventory-server"
+        DOCKER_IMAGE_CLIENT = "kanishkatharuka/inventory-client"
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/KanishkaTharuka/Inventory-Supply-Chain-Management-System.git'
+            }
+        }
+
+        stage('Build Server Docker Image') {
+            steps {
+                script {
+                    dockerImageServer = docker.build("${env.DOCKER_IMAGE_SERVER}:latest", "./server")
+                }
+            }
+        }
+
+        stage('Build Client Docker Image') {
+            steps {
+                script {
+                    dockerImageClient = docker.build("${env.DOCKER_IMAGE_CLIENT}:latest", "./client")
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'dockerhubpassword', variable: 'dockerpass')]) {
+                    script {
+                        // Login to Docker Hub
+                        sh "echo $dockerpass | docker login -u kanishkatharuka --password-stdin"
+                        
+                        // Push both images
+                        sh "docker push ${env.DOCKER_IMAGE_SERVER}:latest"
+                        sh "docker push ${env.DOCKER_IMAGE_CLIENT}:latest"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    sh 'docker compose up -d'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up workspace
+            cleanWs()
+            // Logout from Docker Hub
+            sh 'docker logout'
+        }
+    }
+}
