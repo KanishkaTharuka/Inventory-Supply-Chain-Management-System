@@ -12,7 +12,7 @@ export default function LoginForm() {
       const res = await axios.post('http://localhost:5000/api/auth/login', form);
       localStorage.setItem('token', res.data.token);
       // Redirect to dashboard or home page after successful login
-      window.location.href = '/';
+      window.location.href = '/inventory';
     } catch (err) {
       alert('Login failed');
     }
