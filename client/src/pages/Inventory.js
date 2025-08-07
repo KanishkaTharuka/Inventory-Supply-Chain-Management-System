@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// 
+
 const Inventory = () => {
   const [inventory, setInventory] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -11,8 +11,8 @@ const Inventory = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [newItem, setNewItem] = useState({ name: '', sku: '', quantity: 0, supplierId: '', bin: '' });
-  const [editItem, setEditItem] = useState({ name: '', sku: '', quantity: 0, bin: '', supplierId: '' });
+  const [newItem, setNewItem] = useState({ name: '', sku: '', quantity: 0, supplierId: '', bin: '', salesPrice: 0, purchasePrice: 0 });
+  const [editItem, setEditItem] = useState({ name: '', sku: '', quantity: 0, bin: '', supplierId: '', salesPrice: 0, purchasePrice: 0 });
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const Inventory = () => {
   };
 
   const handleAddItem = () => {
-    setNewItem({ name: '', sku: '', quantity: 0, supplierId: '', bin: '' });
+    setNewItem({ name: '', sku: '', quantity: 0, supplierId: '', bin: '', salesPrice: 0, purchasePrice: 0 });
     setShowAddModal(true);
     setError(null);
   };
@@ -61,12 +61,12 @@ const Inventory = () => {
 
   const handleSaveAdd = async () => {
     try {
-      if (!newItem.name || !newItem.sku || !newItem.supplierId || !newItem.bin) {
-        setError('All fields (name, SKU, supplier, bin) are required.');
+      if (!newItem.name || !newItem.sku || !newItem.supplierId || !newItem.bin || isNaN(newItem.salesPrice) || isNaN(newItem.purchasePrice)) {
+        setError('All fields (name, SKU, supplier, bin, sales price, purchase price) are required.');
         return;
       }
-      if (isNaN(newItem.quantity) || newItem.quantity < 0) {
-        setError('Quantity must be a non-negative number.');
+      if (isNaN(newItem.quantity) || newItem.quantity < 0 || newItem.salesPrice < 0 || newItem.purchasePrice < 0) {
+        setError('Quantity, sales price, and purchase price must be non-negative numbers.');
         return;
       }
       const response = await axios.post('http://localhost:5000/api/inventory', {
@@ -74,12 +74,14 @@ const Inventory = () => {
         sku: newItem.sku,
         quantity: Number(newItem.quantity),
         supplierId: newItem.supplierId,
-        bin: newItem.bin
+        bin: newItem.bin,
+        salesPrice: Number(newItem.salesPrice),
+        purchasePrice: Number(newItem.purchasePrice)
       });
       setItems([...items, response.data]);
       setInventory([...inventory, response.data]);
       setShowAddModal(false);
-      setNewItem({ name: '', sku: '', quantity: 0, supplierId: '', bin: '' });
+      setNewItem({ name: '', sku: '', quantity: 0, supplierId: '', bin: '', salesPrice: 0, purchasePrice: 0 });
       setError(null);
     } catch (err) {
       setError('Error adding item: ' + (err.response?.data?.message || err.message));
@@ -88,12 +90,12 @@ const Inventory = () => {
 
   const handleSaveEdit = async () => {
     try {
-      if (!editItem.name || !editItem.sku || !editItem.supplierId || !editItem.bin) {
-        setError('All fields (name, SKU, supplier, bin) are required.');
+      if (!editItem.name || !editItem.sku || !editItem.supplierId || !editItem.bin || isNaN(editItem.salesPrice) || isNaN(editItem.purchasePrice)) {
+        setError('All fields (name, SKU, supplier, bin, sales price, purchase price) are required.');
         return;
       }
-      if (isNaN(editItem.quantity) || editItem.quantity < 0) {
-        setError('Quantity must be a non-negative number.');
+      if (isNaN(editItem.quantity) || editItem.quantity < 0 || editItem.salesPrice < 0 || editItem.purchasePrice < 0) {
+        setError('Quantity, sales price, and purchase price must be non-negative numbers.');
         return;
       }
       const response = await axios.put(`http://localhost:5000/api/inventory/${selectedItem}`, editItem);
@@ -122,8 +124,8 @@ const Inventory = () => {
     setShowAddModal(false);
     setShowEditModal(false);
     setShowDeleteConfirm(false);
-    setNewItem({ name: '', sku: '', quantity: 0, supplierId: '', bin: '' });
-    setEditItem({ name: '', sku: '', quantity: 0, bin: '', supplierId: '' });
+    setNewItem({ name: '', sku: '', quantity: 0, supplierId: '', bin: '', salesPrice: 0, purchasePrice: 0 });
+    setEditItem({ name: '', sku: '', quantity: 0, bin: '', supplierId: '', salesPrice: 0, purchasePrice: 0 });
     setSelectedItem(null);
     setError(null);
   };
@@ -135,7 +137,6 @@ const Inventory = () => {
   );
 
   const getSupplierName = (supplierId) => {
-    // Check if supplierId is an object (populated) or just an ID
     if (typeof supplierId === 'object' && supplierId.name) {
       return supplierId.name;
     }
@@ -170,13 +171,13 @@ const Inventory = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-200">
-
             <th className="border p-2">Name</th>
             <th className="border p-2">SKU</th>
             <th className="border p-2">Quantity</th>
             <th className="border p-2">Supplier</th>
             <th className="border p-2">Bin</th>
-
+            <th className="border p-2">Sales Price</th>
+            <th className="border p-2">Purchase Price</th>
             <th className="border p-2">Actions</th>
           </tr>
         </thead>
@@ -188,6 +189,8 @@ const Inventory = () => {
               <td className="border p-2">{item.quantity}</td>
               <td className="border p-2">{getSupplierName(item.supplierId)}</td>
               <td className="border p-2">{item.bin}</td>
+              <td className="border p-2">${(item.salesPrice || 0).toFixed(2)}</td>
+              <td className="border p-2">${(item.purchasePrice || 0).toFixed(2)}</td>
               <td className="border p-2">
                 <button onClick={() => handleEditItem(item._id)} className="bg-yellow-500 text-white p-1 rounded mr-2">
                   Edit
@@ -246,7 +249,25 @@ const Inventory = () => {
               placeholder="Bin"
               value={newItem.bin}
               onChange={(e) => setNewItem({ ...newItem, bin: e.target.value })}
+              className="p-2 border rounded w-full mb-2"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Sales Price"
+              value={newItem.salesPrice}
+              onChange={(e) => setNewItem({ ...newItem, salesPrice: e.target.value })}
+              className="p-2 border rounded w-full mb-2"
+              step="0.01"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Purchase Price"
+              value={newItem.purchasePrice}
+              onChange={(e) => setNewItem({ ...newItem, purchasePrice: e.target.value })}
               className="p-2 border rounded w-full mb-4"
+              step="0.01"
               required
             />
             <div className="flex justify-end space-x-2">
@@ -306,7 +327,25 @@ const Inventory = () => {
               placeholder="Bin"
               value={editItem.bin}
               onChange={(e) => setEditItem({ ...editItem, bin: e.target.value })}
+              className="p-2 border rounded w-full mb-2"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Sales Price"
+              value={editItem.salesPrice}
+              onChange={(e) => setEditItem({ ...editItem, salesPrice: e.target.value })}
+              className="p-2 border rounded w-full mb-2"
+              step="0.01"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Purchase Price"
+              value={editItem.purchasePrice}
+              onChange={(e) => setEditItem({ ...editItem, purchasePrice: e.target.value })}
               className="p-2 border rounded w-full mb-4"
+              step="0.01"
               required
             />
             <div className="flex justify-end space-x-2">

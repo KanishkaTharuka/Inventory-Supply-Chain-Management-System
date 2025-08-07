@@ -5,7 +5,9 @@ const inventorySchema = new mongoose.Schema({
   sku: { type: String, required: true, unique: true },
   quantity: { type: Number, required: true, default: 0 },
   supplierId: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', required: true },
-  bin: { type: String, required: true }
+  bin: { type: String, required: true },
+  salesPrice: { type: Number, required: true, default: 0 },
+  purchasePrice: { type: Number, required: true, default: 0 }
 });
 
 module.exports = mongoose.model('Inventory', inventorySchema);
