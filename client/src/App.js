@@ -7,6 +7,7 @@ import Sidebar from './components/Sidebar';
 import Inventory from './pages/Inventory';
 import Order from './pages/Orders';
 import Suppliers from './pages/Suppliers';
+import Home from './pages/Home';
 
 function App() {
   const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
@@ -43,6 +44,12 @@ function App() {
             element={
               <ProtectedRoute>
                 <Suppliers />
+              </ProtectedRoute>
+            } />
+            <Route path="/home" 
+            element={
+              <ProtectedRoute>
+                <Home />
               </ProtectedRoute>
             } />
           </Routes>
