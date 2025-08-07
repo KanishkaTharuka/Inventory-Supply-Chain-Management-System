@@ -170,11 +170,13 @@ const Inventory = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-200">
+
             <th className="border p-2">Name</th>
             <th className="border p-2">SKU</th>
             <th className="border p-2">Quantity</th>
             <th className="border p-2">Supplier</th>
             <th className="border p-2">Bin</th>
+
             <th className="border p-2">Actions</th>
           </tr>
         </thead>
