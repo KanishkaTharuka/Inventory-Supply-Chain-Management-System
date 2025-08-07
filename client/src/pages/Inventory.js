@@ -110,10 +110,10 @@ const Inventory = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-200">
-            <th className="border p-2">Name</th>
-            <th className="border p-2">Stock Keeping Unit</th>
-            <th className="border p-2">Quantity</th>
-            <th className="border p-2">Bin</th>
+            <th className="border p-2">Names</th>
+            <th className="border p-2">Stock Keeping Units</th>
+            <th className="border p-2">Quantitys</th>
+            <th className="border p-2">Bins</th>
             <th className="border p-2">Actions</th>
           </tr>
         </thead>
