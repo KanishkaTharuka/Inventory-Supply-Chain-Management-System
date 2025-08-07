@@ -3,6 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
+const authenticateToken = require('./middleware/authMiddleware');
 
 dotenv.config();
 
@@ -14,8 +15,13 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const authRoutes = require('./routes/auth');
+const inventoryRoutes = require('./routes/inventoryRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
+// Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/orders', orderRoutes);
 
 // MongoDB Connection
 if (!MONGODB_URL) {
