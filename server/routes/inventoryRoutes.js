@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getItems, addItem, updateItem, deleteItem } = require('../controllers/inventoryController');
+const { getInventory, addInventory, updateItem, deleteItem } = require('../controllers/inventoryController');
 
-router.get('/', getItems);
-router.post('/', addItem);
+router.get('/', getInventory);
+router.post('/', addInventory);
 router.put('/:id', updateItem);
 router.delete('/:id', deleteItem);
 

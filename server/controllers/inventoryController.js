@@ -1,19 +1,22 @@
 const Inventory = require('../models/Inventory');
 
-exports.getItems = async (req, res) => {
+exports.getInventory = async (req, res) => {
   try {
-    const items = await Inventory.find();
-    res.json(items);
+    const inventory = await Inventory.find().populate('supplierId');
+    res.json(inventory);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-exports.addItem = async (req, res) => {
-  const { name, sku, quantity, bin } = req.body;
-  const item = new Inventory({ name, sku, quantity, bin });
+exports.addInventory = async (req, res) => {
+  const { name, sku, quantity, supplierId, bin } = req.body;
   try {
-    const newItem = await item.save();
+    if (!name || !sku || !supplierId || !bin) {
+      return res.status(400).json({ message: 'All fields (name, sku, supplierId, bin) are required' });
+    }
+    const inventoryItem = new Inventory({ name, sku, quantity: Number(quantity), supplierId, bin });
+    const newItem = await inventoryItem.save();
     res.status(201).json(newItem);
   } catch (err) {
     res.status(400).json({ message: err.message });

@@ -6,7 +6,7 @@ import LoginForm from './components/LoginForm';
 import Sidebar from './components/Sidebar';
 import Inventory from './pages/Inventory';
 import Order from './pages/Orders';
-
+import Suppliers from './pages/Suppliers';
 
 function App() {
   const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
@@ -39,6 +39,12 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/suppliers" 
+            element={
+              <ProtectedRoute>
+                <Suppliers />
+              </ProtectedRoute>
+            } />
           </Routes>
         </div>
       </div>

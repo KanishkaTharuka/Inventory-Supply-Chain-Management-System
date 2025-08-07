@@ -22,8 +22,8 @@ const Orders = () => {
   };
 
   const fetchInventoryItems = async () => {
-    const response = await axios.get('http://localhost:5000/api/inventory');
-    setInventoryItems(response.data);
+  const response = await axios.get('http://localhost:5000/api/inventory');
+  setInventoryItems(response.data);
   };
 
   const handleAddOrder = () => {
@@ -42,37 +42,17 @@ const Orders = () => {
 
   const handleSaveAdd = async () => {
     try {
-      // Check if we have enough inventory
-      const product = inventoryItems.find(item => item._id === newOrder.productId);
-      if (!product) {
-        alert('Product not found');
-        return;
-      }
-
-      if (product.quantity < newOrder.quantity) {
-        alert(`Not enough inventory! Only ${product.quantity} units available.`);
-        return;
-      }
-
       const response = await axios.post('http://localhost:5000/api/orders', newOrder);
       setOrders([...orders, response.data]);
 
-      // Update inventory quantity
-      const updatedProduct = {
-        ...product,
-        quantity: product.quantity - newOrder.quantity
-      };
-
-      await axios.put(`http://localhost:5000/api/inventory/${product._id}`, updatedProduct);
-      
-      // Check if inventory is low after order
-      if (updatedProduct.quantity <= 50) { // You can adjust this threshold
-        alert(`Low inventory alert: ${product.name} has only ${updatedProduct.quantity} units left!`);
+      // Fetch updated inventory to check low quantity and supplier
+      await fetchInventoryItems();
+      const orderedProduct = inventoryItems.find(item => item._id === newOrder.productId);
+      if (orderedProduct && orderedProduct.quantity < 5) {
+        const supplier = await axios.get(`http://localhost:5000/api/suppliers/${orderedProduct.supplierId}`);
+        alert(`Warning: Inventory for ${orderedProduct.name} is low (${orderedProduct.quantity} units remaining) at 11:03 PM +0530 on Wednesday, August 06, 2025. Contact supplier: ${supplier.data.name} (${supplier.data.contact.email}).`);
       }
 
-      // Refresh inventory items
-      fetchInventoryItems();
-      
       setShowAddModal(false);
       setNewOrder({ productId: '', quantity: 0, customer: '' });
     } catch (err) {
@@ -97,6 +77,14 @@ const Orders = () => {
       setOrders(orders.map(order => order._id === selectedOrder ? response.data.order : order));
       setShowReturnModal(false);
       setReturnDetails({ orderId: '', items: [], reason: '' });
+
+      // Check inventory after return
+      await fetchInventoryItems();
+      const returnedProduct = inventoryItems.find(item => item._id === orders.find(o => o._id === selectedOrder)?.productId);
+      if (returnedProduct && returnedProduct.quantity < 5) {
+        const supplier = await axios.get(`http://localhost:5000/api/suppliers/${returnedProduct.supplierId}`);
+        alert(`Warning: Inventory for ${returnedProduct.name} is low (${returnedProduct.quantity} units remaining) at 11:03 PM +0530 on Wednesday, August 06, 2025. Contact supplier: ${supplier.data.name} (${supplier.data.contact.email}).`);
+      }
     } catch (err) {
       console.error('Error processing return:', err.response?.data?.message || err.message);
     }
@@ -152,8 +140,9 @@ const Orders = () => {
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-200">
-            <th className="border p-2">Customer</th>
+            <th className="border p-2">Customer name</th>
             <th className="border p-2">Product</th>
+            <th className="border p-2">Supplier</th>
             <th className="border p-2">Quantity</th>
             <th className="border p-2">Status</th>
             <th className="border p-2">Actions</th>
@@ -164,6 +153,7 @@ const Orders = () => {
             <tr key={order._id}>
               <td className="border p-2">{order.customer}</td>
               <td className="border p-2">{order.productId?.name || 'N/A'}</td>
+              <td className="border p-2">{order.productId?.supplierId?.name || 'N/A'}</td>
               <td className="border p-2">{order.quantity}</td>
               <td className="border p-2">
                 <select
@@ -203,14 +193,7 @@ const Orders = () => {
             >
               <option value="">Select Product</option>
               {inventoryItems.map(item => (
-                <option 
-                  key={item._id} 
-                  value={item._id}
-                  className={item.quantity <= 10 ? 'text-red-600' : ''}
-                >
-                  {item.name} ({item.quantity} in stock)
-                  {item.quantity <= 10 ? ' - Low Stock!' : ''}
-                </option>
+                <option key={item._id} value={item._id}>{item.name} (Supplier: {item.supplierId?.name || 'N/A'})</option>
               ))}
             </select>
             <input

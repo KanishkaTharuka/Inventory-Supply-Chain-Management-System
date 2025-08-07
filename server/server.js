@@ -17,11 +17,13 @@ app.use(bodyParser.json());
 const authRoutes = require('./routes/auth');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const supplierRoutes = require('./routes/supplierRoutes');
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/suppliers', supplierRoutes);
 
 // MongoDB Connection
 if (!MONGODB_URL) {
